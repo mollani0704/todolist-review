@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
 @Data
 
 public class Todo {
-	private int todocode;
+	private int todoCode;
 	private String todocontent;
 	private int todo_complete;
 	private int importance_flag;
@@ -25,7 +25,7 @@ public class Todo {
 	
 	public TodoListRespDto toListDto() {
 		return TodoListRespDto.builder()
-					.todocode(todocode)
+					.todocode(todoCode)
 					.todocontent(todocontent)
 					.todo_complete(todo_complete)
 					.importance(importance_flag == 1)

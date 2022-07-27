@@ -11,6 +11,7 @@ import com.jongseong.content.domain.todo.Todo;
 import com.jongseong.content.domain.todo.TodoRepository;
 import com.jongseong.content.web.dto.todo.CreateTodoReqDto;
 import com.jongseong.content.web.dto.todo.TodoListRespDto;
+import com.jongseong.content.web.dto.todo.UpdateTodoReqDto;
 
 import lombok.RequiredArgsConstructor;
 
@@ -41,17 +42,65 @@ public class TodoServiceImpl implements TodoService{
 
 	@Override          
 	public List<TodoListRespDto> getTodoList(int page, int contentCount) throws Exception {
+		
+		List<Todo> todoList = todoRepository.getTodoListOfIndex(createGetTodoListMap(page, contentCount));
+		
+		return createTodoListRespDtos(todoList);
+	}
+
+	@Override
+	public List<TodoListRespDto> getImportanceTodoList(int page, int contentCount) throws Exception {
+		
+		List<Todo> todoList = todoRepository.getImportanceTodoListOfIndex(createGetTodoListMap(page, contentCount));
+		
+		return createTodoListRespDtos(todoList);
+	}
+	
+	@Override
+	public boolean updateTodoComplete(int todo_Code) throws Exception {
+		
+		return todoRepository.updateTodoComplete(todo_Code) > 0;
+	}
+
+	@Override
+	public boolean updateTodoImportance(int todoCode) throws Exception {
+		return todoRepository.updateTodoImportance(todoCode) > 0;
+	}
+	
+	@Override
+	public boolean updateTodo(UpdateTodoReqDto updateTodoReqDto) throws Exception {
+		
+		return todoRepository.updateTodoByTodoCode(updateTodoReqDto.toEntity()) > 0;
+	}
+	
+	@Override
+	public boolean removeTodo(int todoCode) throws Exception {
+	
+		return todoRepository.remove(todoCode) > 0;
+	}
+	
+	private Map<String, Object> createGetTodoListMap(int page, int contentCount) {
 		Map<String, Object> map = new HashMap<String, Object>();
 		map.put("index", (page - 1) * contentCount);
 		map.put("count", contentCount);
 		
-		List<Todo> todoList = todoRepository.getTodoListOfIndex(map);
-		
+		return map;
+	}
+	
+	private List<TodoListRespDto> createTodoListRespDtos(List<Todo> todoList) {
 		List<TodoListRespDto> todoListRespDtos = new ArrayList<TodoListRespDto>();
-		todoList.forEach(todo -> {
-			todoListRespDtos.add(todo.toListDto());
+		
+
+		todoList.forEach(data -> {
+			todoListRespDtos.add(data.toListDto());
 		});
 		
 		return todoListRespDtos;
 	}
+
+
+
+	
+
+	
 }
