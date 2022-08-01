@@ -29,6 +29,11 @@ public class TodoController {
 	
 	private final TodoService todoService;
 	
+	@GetMapping("/test/reload")
+	public String testReload() {
+		return "Test123";
+	}
+	
 	@GetMapping("/list/{type}")
 	public ResponseEntity<?> getTodoList(@PathVariable String type, @RequestParam int page, @RequestParam int contentCount) {
 		
