@@ -2,7 +2,8 @@ const selectedTypeButton = document.querySelector(".selected-type-button");
 const typeSelectBoxList = document.querySelector(".type-select-box-list");
 const typeSelectBoxListLis = typeSelectBoxList.querySelectorAll("li");
 const todoContentList = document.querySelector('.todo-content-list');
-const sectionBody = document.querySelector('.section-body')
+const sectionBody = document.querySelector('.section-body');
+const incompleteCountNumber = document.querySelector(".incomplete-count-number");
 
 let page = 1;
 let totalPage = 0
@@ -83,7 +84,7 @@ function setTotalCount(totalCount) {
 }
 
 function getList(data) {
-	const incompleteCountNumber = document.querySelector(".incomplete-count-number");
+
 	incompleteCountNumber.textContent = data[0].incompleteCount;
 	setTotalCount(data[0].totalCount);
 	
@@ -100,7 +101,136 @@ function getList(data) {
          </li>
 		`
 		todoContentList.innerHTML += listContent;
+		
 	}
+	addEvent();
+}
+
+
+function addEvent() {
+	
+	const todoContents = document.querySelectorAll(".todo-content");
+	
+	for(let i = 0; i < todoContents.length; i++) {
+		
+		let todoCode = todoContents[i].querySelector(".complete-check").getAttribute("id");
+		let index = todoCode.lastIndexOf("-");
+		todoCode = todoCode.substring(index + 1);
+		console.log("id: " + todoCode)
+		
+		todoContents[i].querySelector(".complete-check").onchange = () => {
+			let incompleteCount = parseInt(incompleteCountNumber.textContent);
+			
+			if(todoContents[i].querySelector(".complete-check").checked) {
+				incompleteCountNumber.textContent = incompleteCount - 1;
+			} else {
+				incompleteCountNumber.textContent = incompleteCount + 1;	
+			}
+			
+			updateCheckStatus("complete",todoContents[i], todoCode);
+		}
+		
+		todoContents[i].querySelector(".importance-check").onchange = () => {
+			updateCheckStatus("importance",todoContents[i], todoCode);
+		}
+		todoContents[i].querySelector(".trash-button").onclick = () => {
+			deleteTodo(todoContents[i], todoCode)
+		}
+		
+		const todoContentText = todoContents[i].querySelector(".todo-content-text");
+		const todoContentInput = todoContents[i].querySelector(".todo-content-input");
+		let todoContentValue = null;
+		
+		let eventFlag = false;
+		
+		todoContentText.onclick = () => {
+			todoContentValue = todoContentInput.value;
+			todoContentText.classList.toggle("visible");
+			todoContentInput.classList.toggle("visible");
+			todoContentInput.focus();
+			eventFlag = true;
+		}
+		
+		let updateTodoContent = (todoCode) => {
+			if(todoContentValue != todoContentInput.value) {
+					$.ajax({
+						type: "put",
+						url: `/api/v1/todolist/todo/${todoCode}`,
+						contentType: "application/json",
+						data: JSON.stringify({
+							todoCode:todoCode,
+							todo: todoContentInput.value
+							}),
+						async: false,
+						dataType: "json",
+						success: (response) => {
+							if(response.data) {
+								todoContentText.textContent = todoContentInput.value;
+							}
+						},
+						error: errorMessage
+					})
+				}
+				todoContentText.classList.toggle("visible");
+				todoContentInput.classList.toggle("visible");	
+		}
+		
+		todoContentInput.onblur = () => {
+			if(eventFlag) {
+				updateTodoContent(todoCode);
+			}
+		}
+		
+		todoContentInput.onkeyup = () => {
+			if(window.event.keyCode == 13) {
+				eventFlag = false;
+				updateTodoContent(todoCode);
+		}
+		} 
+			
+	}
+}
+
+function updateStatus(type, todoCode) {
+	result = false;
+	
+	$.ajax({
+		type: "put",
+		url: `/api/v1/todolist/${type}/todo/${todoCode}`,
+		async: false,
+		dataType: "json",
+		success: (response) => {
+			result = response.data
+		},
+		error: errorMessage
+		
+	})
+	return result;
+}
+
+function updateCheckStatus(type, todoContent, todoCode) {
+	
+	let result = updateStatus(type, todoCode);
+	
+	if(((type == "complete" && (listType == "complete" || listType == "incomplete")) 
+			|| (type == "importance" && listType == "importance")) && result )  {
+		todoContentList.removeChild(todoContent);
+	} 
+}
+
+function deleteTodo(todoContent, todoCode) {
+	$.ajax({
+		type: "delete",
+		url: `/api/v1/todolist/todo/${todoCode}`,
+		async: false,
+		dataType: "json",
+		success: (response) => {
+			if(response.data) {
+				todoContentList.removeChild(todoContent);
+			}
+		},
+		error: errorMessage
+	})
 }
 
 function errorMessage(request, status, error) {
