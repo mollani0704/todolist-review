@@ -32,8 +32,8 @@ public class Todo {
 					.importance(importance_flag == 1)
 					.totalCount(total_count)
 					.incompleteCount(incomplete_count)
-					.create_date(create_date)
-					.update_date(update_date)
+					.createdate(create_date)
+					.updatedate(update_date)
 					.build();
 	}
 }

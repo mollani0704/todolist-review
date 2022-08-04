@@ -5,7 +5,7 @@
   <mapper namespace="com.jongseong.content.domain.todo.TodoRepository">
  	<insert id="save" parameterType="com.jongseong.content.domain.todo.Todo">
  		insert into
- 			todo_mst
+ 			todolist
  		values(
  			0, 
  			#{todocontent},
@@ -26,15 +26,15 @@
  			tt.total_count,
  			tc.incomplete_count,
  			
- 			tm.create_date,
- 			tm.update_date
+ 			tm.createdate,
+ 			tm.updatedate
  			
  		from 
- 			todo_mst tm
+ 			todolist tm
 			LEFT OUTER JOIN (select
 								COUNT(*) AS total_count
 							FROM 
-								todo_mst
+								todolist
 							where
 								<choose>
 									<when test='type.equals("importance")'>
@@ -55,7 +55,7 @@
 			left outer join (select
 										COUNT(todo_complete) AS incomplete_count
 									from
-										todo_mst
+										todolist
 									where
 										todo_complete = 0
 										<if test='type.equals("importance")'>
@@ -84,7 +84,7 @@
  	 
  	<update id="updateTodoComplete" parameterType="Integer">
 	 		UPDATE
-				todo_mst
+				todolist
 			SET
 				todo_complete = case when todo_complete = '0' then 1 ELSE 0 end
 			WHERE
@@ -93,7 +93,7 @@
 	
 	<update id="updateTodoImportance" parameterType="Integer">
 	 		UPDATE
-				todo_mst
+				todolist
 			SET
 				importance_flag = case when importance_flag = '0' then 1 ELSE 0 end
 			WHERE
@@ -102,11 +102,11 @@
 	
 	<update id="updateTodoByTodoCode" parameterType="com.jongseong.content.domain.todo.Todo">
 		update
-			todo_mst
+			todolist
 		set
 			todocontent = #{todocontent},
 			
-			update_date = now()
+			updatedate = now()
 		where
 			todocode = #{todoCode}; 
 	</update>
@@ -114,7 +114,7 @@
 	<delete id="remove" parameterType="Integer">
 		delete
 		from
-			todo_mst
+			todolist
 		where
 			todocode = #{todo_code}
 	
