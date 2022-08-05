@@ -4,6 +4,8 @@ const typeSelectBoxListLis = typeSelectBoxList.querySelectorAll("li");
 const todoContentList = document.querySelector('.todo-content-list');
 const sectionBody = document.querySelector('.section-body');
 const incompleteCountNumber = document.querySelector(".incomplete-count-number");
+const modalContainer = document.querySelector(".modal-container");
+const todoAddButton = document.querySelector(".todo-add-button");
 
 /*
 	게시글 불러오기
@@ -198,12 +200,10 @@ function createList(todolist) {
 
 
 sectionBody.onscroll = () => {
-	console.log(todoContentList.clientHeight - sectionBody.offsetHeight - sectionBody.scrollTop);
 	
 	let checkNum = todoContentList.clientHeight - sectionBody.offsetHeight - sectionBody.scrollTop;
 	
 	if(checkNum < 1 && checkNum > -1 && page < totalPage) {
-		console.log(page);
 		page++;
 		load();
 	}
@@ -262,6 +262,60 @@ for(let i = 0; i < typeSelectBoxListLis.length; i++) {
 		typeSelectBoxList.classList.toggle('visible');
 	}
 }
+
+
+todoAddButton.onclick = () => {
+	modalContainer.classList.toggle("modal-visible");
+	todoContentList.style.overflow = "hidden";
+	setModalEvent();
+}
+
+function clearModalTodoInputValue(modalTodoInput) {
+	modalTodoInput.value = "";
+}
+
+function uncheckedImportance(importanceFlag) {
+	importanceFlag.checked = false;
+}
+
+function setModalEvent() {
+	const modalCloseButton = modalContainer.querySelector(".modal-close-button");
+	const importanceFlag = modalContainer.querySelector(".importance-check");
+	const modalTodoInput = modalContainer.querySelector(".modal-todo-input");
+	const modalCommitButton = modalContainer.querySelector(".modal-commit-button");
+
+
+	modalContainer.onclick = (event) => {
+		if(event.target == modalContainer) {
+			modalCloseButton.click()
+		}
+	}
+
+	modalCloseButton.onclick = () => {
+		modalContainer.classList.toggle("modal-visible");
+		todoContentList.style.overflow = "auto";
+		uncheckedImportance(importanceFlag)
+		clearModalTodoInputValue(modalTodoInput)
+	}
+
+	modalTodoInput.onkeyup = () => {
+		if(window.event.keyCode == 13) {
+			modalCommitButton.click();
+		}
+	}
+
+	modalCommitButton.onclick = () => {
+		console.log("test")
+		let data = {
+			importance: importanceFlag.checked,
+			todo: modalTodoInput.value
+		}
+
+		addTodo(data);
+		modalCloseButton.click();
+	}
+}
+
 
 //>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Requset 요청
 
@@ -337,6 +391,24 @@ function deleteTodo(todoContent, todoCode) {
 		success: (response) => {
 			if(response.data) {
 				todoContentList.removeChild(todoContent);
+			}
+		},
+		error: errorMessage
+	})
+}
+
+function addTodo(data) {
+	$.ajax({
+		type: "post",
+		url: "/api/v1/todolist/todo",
+		contentType: "application/json",
+		data: JSON.stringify(data),
+		async: false,
+		dataType: "json",
+		success: (response) => {
+			if(response.data) {
+				clearTodoContentList();
+				load();
 			}
 		},
 		error: errorMessage

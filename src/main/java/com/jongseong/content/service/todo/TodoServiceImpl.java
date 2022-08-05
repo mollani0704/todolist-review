@@ -25,19 +25,19 @@ public class TodoServiceImpl implements TodoService{
 	public boolean createTodo(CreateTodoReqDto createTodoReqDto) throws Exception {
 		
 		Todo todoEntity = createTodoReqDto.toEntity();
-		String content = todoEntity.getTodocontent();
-		for(int i = 200; i < 300; i++) {
-			todoEntity.setTodocontent(content + "_" + (i + 1));
-			if(i % 2 == 0) {
-				todoEntity.setImportance_flag(1);
-			}else {
-				todoEntity.setImportance_flag(0);
-			}
-			todoRepository.save(todoEntity);
-		}
-		return true;
+//		String content = todoEntity.getTodocontent();
+//		for(int i = 200; i < 300; i++) {
+//			todoEntity.setTodocontent(content + "_" + (i + 1));
+//			if(i % 2 == 0) {
+//				todoEntity.setImportance_flag(1);
+//			}else {
+//				todoEntity.setImportance_flag(0);
+//			}
+//			todoRepository.save(todoEntity);
+//		}
+//		return true;
 		
-//		return todoRepository.save(todoEntity) > 0;
+		return todoRepository.save(todoEntity) > 0;
 	}
 
 	@Override          
